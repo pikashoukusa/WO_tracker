@@ -486,6 +486,16 @@
             outline: none;
         }
 
+        .stepper-unit {
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+            margin-right: 6px;
+            pointer-events: none;
+            user-select: none;
+            text-transform: uppercase;
+        }
+
         .btn-check-set {
             height: 38px;
             width: 44px;
@@ -689,7 +699,7 @@
             </div>
             <div>
                 <h1 class="app-title">Physique & Posture</h1>
-                <div class="app-sub">Target Wisuda 2 Des 2026</div>
+                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.1</span></div>
             </div>
         </div>
         <button onclick="switchTab('panduan')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; padding: 6px;">
@@ -963,6 +973,7 @@
                 <button class="btn-full secondary" onclick="document.getElementById('import-file-input').click()"><i class="fa-solid fa-upload"></i> Restore JSON</button>
                 <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="importJSONData(event)">
             </div>
+            <button class="btn-full" style="background: rgba(45, 212, 191, 0.15); border: 1px solid var(--accent-teal); color: var(--accent-teal); margin-top: 10px;" onclick="forcePurgeCache()"><i class="fa-solid fa-arrows-rotate"></i> Muat Ulang Versi Terbaru (Bypass Cache)</button>
         </div>
     </div>
 </div>
@@ -1096,7 +1107,9 @@
 
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.register('sw.js?v=2').then(reg => {
+                reg.update();
+            }).catch(() => {});
         }
     });
 
@@ -1221,10 +1234,10 @@
                     </div>
                     <div class="ex-scheme">${ex.sets} × ${ex.reps}</div>
                 </div>
-                <div style="display: grid; grid-template-columns: 32px 1fr 1fr 44px; gap: 8px; font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; text-align: center;">
+                <div style="display: grid; grid-template-columns: 32px 1fr 1fr 44px; gap: 8px; font-family: var(--font-mono); font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; text-align: center; font-weight: 600;">
                     <div>SET</div>
-                    <div>BEBAN (KG)</div>
-                    <div>REPS</div>
+                    <div style="color: var(--accent-blue);"><i class="fa-solid fa-weight-hanging" style="font-size: 0.65rem;"></i> BEBAN</div>
+                    <div style="color: var(--accent-teal);"><i class="fa-solid fa-repeat" style="font-size: 0.65rem;"></i> REPS</div>
                     <div>DONE</div>
                 </div>
                 <div id="sets-container-${exIdx}">
@@ -1248,11 +1261,13 @@
                     <div class="stepper">
                         <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', -2.5)">-</button>
                         <input type="number" step="0.5" class="stepper-input" id="w-${exIdx}-${s}" value="${defWeight}">
+                        <span class="stepper-unit">kg</span>
                         <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', +2.5)">+</button>
                     </div>
                     <div class="stepper">
                         <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', -1)">-</button>
                         <input type="number" class="stepper-input" id="r-${exIdx}-${s}" value="${defReps}">
+                        <span class="stepper-unit">rep</span>
                         <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', +1)">+</button>
                     </div>
                     <button class="btn-check-set" id="chk-${exIdx}-${s}" onclick="toggleSetDone(${exIdx}, ${s}, ${ex.rest})">
@@ -1589,6 +1604,23 @@
             }
         };
         reader.readAsText(file);
+    }
+
+    function forcePurgeCache() {
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                return Promise.all(names.map(name => caches.delete(name)));
+            }).then(() => {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(regs => {
+                        regs.forEach(r => r.unregister());
+                    });
+                }
+                window.location.reload(true);
+            });
+        } else {
+            window.location.reload(true);
+        }
     }
 </script>
 
