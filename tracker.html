@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Physique & Posture — Wisuda 2026</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0d14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Physique2026">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-surface: #121722;
+            --bg-card: #161c2b;
+            --bg-card-subtle: #1c2336;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(79, 142, 247, 0.4);
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --accent-blue: #4f8ef7;
+            --accent-teal: #2dd4bf;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-emerald: #10b981;
+            --accent-purple: #a855f7;
+            
+            --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --nav-height: 64px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 80px);
+            line-height: 1.45;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input, textarea, select {
+            user-select: auto;
+            -webkit-user-select: auto;
+            font-size: 16px !important; /* Prevents auto-zoom on iOS */
+        }
+
+        .app-container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 16px 16px 20px 16px;
+        }
+
+        /* Top Bar */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0 16px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .app-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(79, 142, 247, 0.2), rgba(45, 212, 191, 0.2));
+            border: 1px solid var(--border-active);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+        }
+
+        .app-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .app-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* Countdown Badges */
+        .countdown-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .countdown-pill {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .countdown-pill.sidang {
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .countdown-pill.wisuda {
+            border-color: rgba(45, 212, 191, 0.35);
+        }
+
+        .countdown-icon {
+            font-size: 1.25rem;
+        }
+
+        .countdown-pill.sidang .countdown-icon { color: var(--accent-amber); }
+        .countdown-pill.wisuda .countdown-icon { color: var(--accent-teal); }
+
+        .countdown-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+
+        .countdown-val {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        /* Today's Mission Card */
+        .today-card {
+            background: linear-gradient(135deg, rgba(22, 28, 43, 0.95), rgba(18, 23, 34, 0.95));
+            border: 1px solid var(--border-active);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .today-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .today-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .today-loc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .today-preview-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .btn-launch-workout {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(79, 142, 247, 0.3);
+        }
+
+        .btn-launch-workout:active {
+            transform: scale(0.98);
+        }
+
+        /* Rest Timer Floating Bar (Sticky Bottom above Nav) */
+        .floating-timer-bar {
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            bottom: calc(var(--nav-height) + var(--safe-bottom) + 12px);
+            max-width: 648px;
+            margin: 0 auto;
+            background: rgba(18, 23, 34, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--accent-teal);
+            border-radius: 14px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .floating-timer-bar.hidden {
+            transform: translateY(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .timer-time-box {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .timer-countdown {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent-teal);
+        }
+
+        .timer-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .timer-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-timer-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        .btn-timer-action.primary {
+            background: var(--accent-teal);
+            color: #042f2e;
+            font-weight: 700;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--nav-height) + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: rgba(12, 16, 25, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.68rem;
+            font-weight: 500;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item i {
+            font-size: 1.15rem;
+        }
+
+        .nav-item.active {
+            color: var(--accent-blue);
+        }
+
+        /* Screen Sections */
+        .screen-view {
+            display: none;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .screen-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 1.02rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        /* Interactive Exercise Logger Card */
+        .exercise-block {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .ex-name {
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .ex-scheme {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+            background: rgba(79, 142, 247, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .ex-cue {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* Set Row within Exercise */
+        .set-row {
+            display: grid;
+            grid-template-columns: 32px 1fr 1fr 44px;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .set-row:last-child {
+            border-bottom: none;
+        }
+
+        .set-num {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        /* Number Steppers for Mobile */
+        .stepper {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            height: 38px;
+            overflow: hidden;
+        }
+
+        .stepper-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .stepper-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .stepper-input {
+            width: 100%;
+            background: none;
+            border: none;
+            color: white;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .btn-check-set {
+            height: 38px;
+            width: 44px;
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-check-set.done {
+            background: var(--accent-emerald);
+            border-color: var(--accent-emerald);
+            color: #042f2e;
+        }
+
+        /* Calendar Matrix on Mobile */
+        .cal-week-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .cal-week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cal-week-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .cal-days-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .cal-day-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .cal-day-box.checked {
+            border-color: var(--accent-teal);
+            background: rgba(45, 212, 191, 0.12);
+        }
+
+        .cal-day-name {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        .cal-day-date {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .cal-day-check {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .cal-day-box.checked .cal-day-check {
+            color: var(--accent-teal);
+        }
+
+        /* Form Controls */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-lbl {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-inp {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: white;
+            font-family: var(--font-sans);
+            outline: none;
+        }
+
+        .form-inp:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* Buttons */
+        .btn-full {
+            width: 100%;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-full.secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        .btn-full:active {
+            opacity: 0.85;
+        }
+
+        /* Tags */
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .tag-reentry { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+        .tag-build { background: rgba(79, 142, 247, 0.15); color: #93c5fd; }
+        .tag-refine { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
+        .tag-taper { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
+        .tag-sidang { background: rgba(244, 63, 94, 0.2); color: #fda4af; font-weight: 600; }
+        .tag-wisuda { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 600; }
+
+        /* History items */
+        .history-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .history-meta {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            margin-bottom: 6px;
+        }
+
+        .history-body {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header class="top-header">
+        <div class="app-title-group">
+            <div class="app-logo">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div>
+                <h1 class="app-title">Physique & Posture</h1>
+                <div class="app-sub">Target Wisuda 2 Des 2026</div>
+            </div>
+        </div>
+        <button onclick="switchTab('panduan')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; padding: 6px;">
+            <i class="fa-solid fa-circle-info"></i>
+        </button>
+    </header>
+
+    <!-- Countdown Badges -->
+    <div class="countdown-row">
+        <div class="countdown-pill sidang">
+            <i class="fa-solid fa-graduation-cap countdown-icon"></i>
+            <div>
+                <div class="countdown-meta">Sidang Skripsi</div>
+                <div class="countdown-val" id="countdown-sidang-text">-- Hari</div>
+            </div>
+        </div>
+        <div class="countdown-pill wisuda">
+            <i class="fa-solid fa-award countdown-icon"></i>
+            <div>
+                <div class="countdown-meta">Hari Wisuda</div>
+                <div class="countdown-val" id="countdown-wisuda-text">-- Hari</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 1: HARI INI ==================== -->
+    <div id="tab-today" class="screen-view active">
+        <!-- Today Card -->
+        <div class="today-card">
+            <div class="today-badge">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span id="today-day-label">HARI INI</span>
+            </div>
+            <div class="today-title" id="today-workout-title">Memuat jadwal...</div>
+            <div class="today-loc" id="today-loc-text">
+                <i class="fa-solid fa-location-dot"></i> <span>-</span>
+            </div>
+            <div class="today-preview-chips" id="today-chips">
+                <!-- Populated by JS -->
+            </div>
+            <button class="btn-launch-workout" onclick="launchTodaySession()">
+                <i class="fa-solid fa-play"></i> Mulai Sesi Ini Sekarang
+            </button>
+        </div>
+
+        <!-- Quick Summary Metrics -->
+        <div class="section-card">
+            <div class="section-title">
+                <span>Progress Program (10 Pekan)</span>
+                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-teal);" id="quick-progress-pct">0%</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+                <div id="quick-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal)); transition: width 0.3s;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">
+                <span id="quick-sessions-count">0 / 44 sesi selesai</span>
+                <span id="quick-current-phase">Fase 1: Re-entry</span>
+            </div>
+        </div>
+
+        <!-- Priority Reminder -->
+        <div class="section-card" style="border-left: 3px solid var(--accent-blue); padding: 12px 14px;">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--accent-blue); text-transform: uppercase; font-weight: 600;">
+                Prioritas Utama
+            </div>
+            <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>Skripsi & Sidang (15 Okt)</strong> &gt; Tidur (7–9j) &gt; Protein & Nutrisi &gt; Latihan 3×/mgg. Jangan paksakan latihan bila mengorbankan tidur & sidang.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 2: LIVE LOGGER ==================== -->
+    <div id="tab-logger" class="screen-view">
+        <div class="section-card">
+            <div class="section-title">
+                <span>Eksekusi Latihan Live</span>
+                <button onclick="confirmResetCurrentWorkout()" style="background: none; border: none; color: var(--text-dim); font-size: 0.78rem;">Reset Input</button>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label class="form-lbl">Pilih Program Latihan</label>
+                <select class="form-inp" id="active-routine-select" onchange="loadRoutineTemplate(this.value)">
+                    <option value="A">Workout A — Push (Dada, Bahu, Triceps)</option>
+                    <option value="B">Workout B — Pull (Punggung Atas, Rear Delt, Lats)</option>
+                    <option value="C">Workout C — Full Body & Visual (Squat, Bench, Lateral)</option>
+                    <option value="Rumah">Sesi Rumah — Pull-Up & Core</option>
+                    <option value="Darurat">Versi Darurat Rumah (20-25 Menit)</option>
+                </select>
+            </div>
+
+            <!-- Exercises Container -->
+            <div id="routine-exercises-list">
+                <!-- Dynamically generated exercise cards with stepper inputs -->
+            </div>
+
+            <!-- Completion Info -->
+            <div class="form-row" style="margin-top: 14px;">
+                <div>
+                    <label class="form-lbl">BB Pagi (kg)</label>
+                    <input type="number" step="0.1" class="form-inp" id="finish-weight" placeholder="e.g. 63.2">
+                </div>
+                <div>
+                    <label class="form-lbl">Tidur Semalam (jam)</label>
+                    <input type="number" step="0.5" class="form-inp" id="finish-sleep" placeholder="e.g. 7.5">
+                </div>
+            </div>
+
+            <button class="btn-full" onclick="finishAndSaveWorkout()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Selesaikan & Simpan Sesi Hari Ini
+            </button>
+        </div>
+
+        <!-- Session History Section -->
+        <div class="section-card">
+            <div class="section-title">
+                <span>Riwayat Sesi Terakhir</span>
+                <button onclick="exportJSONData()" style="background: none; border: none; color: var(--accent-blue); font-size: 0.75rem; font-family: var(--font-mono);"><i class="fa-solid fa-download"></i> Backup Data</button>
+            </div>
+            <div id="recent-logs-container">
+                <!-- Log cards -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 3: KALENDER 10 PEKAN ==================== -->
+    <div id="tab-calendar" class="screen-view">
+        <div class="section-card">
+            <div class="section-title">
+                <span>Kalender 10 Minggu (Tap Sesi)</span>
+                <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">28 Sep – 2 Des</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+                Tap kotak hari untuk mencentang status kehadiran. Urutan gym tetap A &gt; B &gt; C bila bergeser.
+            </p>
+
+            <div id="calendar-weeks-container">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 4: CHECK-IN & KALIBURASI ==================== -->
+    <div id="tab-checkin" class="screen-view">
+        <div class="section-card">
+            <div class="section-title">
+                <span>Kalkulator Kalibrasi Kalori</span>
+                <i class="fa-solid fa-calculator" style="color: var(--accent-teal);"></i>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+                Evaluasi tiap 2–3 minggu dari rata-rata berat badan, lingkar pinggang, dan kapasitas beban.
+            </p>
+
+            <div style="margin-bottom: 10px;">
+                <label class="form-lbl">Tren Berat Badan (Moving Avg)</label>
+                <select class="form-inp" id="calc-bb" onchange="runCalorieHelper()">
+                    <option value="turun">Turun terus secara konsisten</option>
+                    <option value="stabil" selected>Stabil / Fluktuasi normal</option>
+                    <option value="naik">Naik terlalu cepat</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label class="form-lbl">Tren Lingkar Pinggang (cm)</label>
+                <select class="form-inp" id="calc-waist" onchange="runCalorieHelper()">
+                    <option value="stabil" selected>Stabil / Terkendali</option>
+                    <option value="mengecil">Mengecil</option>
+                    <option value="membesar">Membesar / Melebar</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label class="form-lbl">Kapasitas Kekuatan (Strength)</label>
+                <select class="form-inp" id="calc-strength" onchange="runCalorieHelper()">
+                    <option value="naik" selected>Naik pada mayoritas gerakan</option>
+                    <option value="stagnan">Stagnan / Turun</option>
+                </select>
+            </div>
+
+            <div id="calc-result-box" style="background: rgba(45, 212, 191, 0.1); border: 1px solid rgba(45, 212, 191, 0.3); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: #5eead4;">
+                <!-- Result string -->
+            </div>
+        </div>
+
+        <!-- Weekly Checkin Log -->
+        <div class="section-card">
+            <div class="section-title">
+                <span>Input Check-in Pekan Ini</span>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label class="form-lbl">Pekan Ke-</label>
+                    <select class="form-inp" id="ci-week-select">
+                        <option value="1">Minggu 1 (4 Okt)</option>
+                        <option value="2">Minggu 2 (11 Okt)</option>
+                        <option value="3">Minggu 3 (18 Okt - Sidang)</option>
+                        <option value="4">Minggu 4 (25 Okt)</option>
+                        <option value="5">Minggu 5 (1 Nov)</option>
+                        <option value="6">Minggu 6 (8 Nov)</option>
+                        <option value="7">Minggu 7 (15 Nov)</option>
+                        <option value="8">Minggu 8 (22 Nov)</option>
+                        <option value="9">Minggu 9 (29 Nov)</option>
+                        <option value="10">Minggu 10 (2 Des - Wisuda)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-lbl">Rata-rata BB (kg)</label>
+                    <input type="number" step="0.1" class="form-inp" id="ci-bb" placeholder="e.g. 63.1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label class="form-lbl">Lingkar Pinggang (cm)</label>
+                    <input type="number" step="0.5" class="form-inp" id="ci-waist" placeholder="e.g. 76.5">
+                </div>
+                <div>
+                    <label class="form-lbl">Rata-rata Tidur (jam)</label>
+                    <input type="number" step="0.5" class="form-inp" id="ci-sleep" placeholder="e.g. 7.5">
+                </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label class="form-lbl">Foto Progres (Ambil di HP)</label>
+                <div style="display: flex; gap: 14px; font-size: 0.82rem; color: #cbd5e1;">
+                    <label><input type="checkbox" id="ci-photo-d"> Depan (D)</label>
+                    <label><input type="checkbox" id="ci-photo-s"> Samping (S)</label>
+                    <label><input type="checkbox" id="ci-photo-b"> Belakang (B)</label>
+                </div>
+            </div>
+            <button class="btn-full" onclick="saveWeeklyCheckin()">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Data Check-in
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 5: PANDUAN & PROTOKOL ==================== -->
+    <div id="tab-panduan" class="screen-view">
+        <div class="section-card" style="border-color: rgba(245, 158, 11, 0.4);">
+            <div class="section-title" style="color: #fbbf24;">
+                <span>Protokol Pekan Sidang (12–18 Okt)</span>
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <p style="font-size: 0.8rem; color: #e2e8f0; line-height: 1.5;">
+                • <strong>Sen 12 Okt:</strong> Workout A Ringan (2 set, RIR 3–4)<br>
+                • <strong>Sel 13 Okt:</strong> Pull-up ringan 2 set atau libur<br>
+                • <strong>Rab 14 Okt (H-1):</strong> <strong>LIBUR TOTAL</strong>. Tidur & mental readiness<br>
+                • <strong>Kam 15 Okt:</strong> <strong>SIDANG SKRIPSI</strong> (tanpa latihan)<br>
+                • <strong>Jum 16 Okt:</strong> Workout C Ringan (2 set, tanpa squat berat)<br>
+                • <strong>Sen 19 Okt:</strong> Kembali ke volume penuh tanpa kompensasi
+            </p>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <span>Aturan Eksekusi Inti</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;">
+                <p>• <strong>Intensitas:</strong> Mayoritas set RIR 1–3. Isolasi (lateral raise, curl) boleh mendekati failure. Compound tidak perlu failure.</p>
+                <p>• <strong>Double Progression:</strong> Naikkan repetisi hingga menyentuh batas atas seluruh set, baru naikkan beban 1 tingkat.</p>
+                <p>• <strong>Minggu Sibuk:</strong> Hanya 2× (A + B). Hanya 1× (versi darurat/full body). 0× (kembali normal tanpa dobel volume).</p>
+                <p>• <strong>Versi Darurat Rumah (20–25 mnt):</strong> Push-up 3 set, Pull-up 3 set, Pike push-up 2 set, Plank 2 set.</p>
+                <p>• <strong>Nutrisi:</strong> Protein 100–130 g/hari. Kalori awal 2.100–2.400 kkal. Creatine 3–5 g/hari tanpa loading.</p>
+                <p>• <strong>Tidur:</strong> Target 7–9 jam. 7–8 jam tidur + 3 latihan jauh lebih baik dibanding 5–6 jam tidur + 5 latihan.</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <span>Manajemen Data</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-full secondary" onclick="exportJSONData()"><i class="fa-solid fa-download"></i> Backup JSON</button>
+                <button class="btn-full secondary" onclick="document.getElementById('import-file-input').click()"><i class="fa-solid fa-upload"></i> Restore JSON</button>
+                <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="importJSONData(event)">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Rest Timer Bar -->
+<div class="floating-timer-bar hidden" id="floating-timer">
+    <div class="timer-time-box">
+        <span class="timer-countdown" id="timer-display-float">01:30</span>
+        <span class="timer-label">Istirahat</span>
+    </div>
+    <div class="timer-actions">
+        <button class="btn-timer-action" onclick="adjustTimer(-15)">-15s</button>
+        <button class="btn-timer-action" onclick="adjustTimer(+15)">+15s</button>
+        <button class="btn-timer-action primary" id="btn-timer-control" onclick="toggleFloatingTimer()">Pause</button>
+        <button class="btn-timer-action" onclick="closeFloatingTimer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+</div>
+
+<!-- Bottom Navigation Bar -->
+<nav class="bottom-nav">
+    <div class="nav-item active" id="nav-today" onclick="switchTab('today')">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Hari Ini</span>
+    </div>
+    <div class="nav-item" id="nav-logger" onclick="switchTab('logger')">
+        <i class="fa-solid fa-dumbbell"></i>
+        <span>Latihan</span>
+    </div>
+    <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Kalender</span>
+    </div>
+    <div class="nav-item" id="nav-checkin" onclick="switchTab('checkin')">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Check-in</span>
+    </div>
+    <div class="nav-item" id="nav-panduan" onclick="switchTab('panduan')">
+        <i class="fa-solid fa-book"></i>
+        <span>Panduan</span>
+    </div>
+</nav>
+
+<script>
+    // --- Program Database ---
+    const ROUTINES = {
+        A: {
+            title: "Workout A — Push (Senin)",
+            location: "Gym (Rumah Saudara)",
+            exercises: [
+                { name: "Incline DB Press", sets: 3, reps: "8–12", rest: 90, cue: "Upper chest, sudut bangku 30–45°" },
+                { name: "Smith / DB Shoulder Press", sets: 3, reps: "8–12", rest: 90, cue: "Bahu, kontrol deselerasi negatif" },
+                { name: "Cable Lateral Raise", sets: 4, reps: "12–20", rest: 60, cue: "Prioritas visual bahu lebar (v-taper)" },
+                { name: "Cable Fly Low-to-High", sets: 3, reps: "12–15", rest: 60, cue: "Upper chest contraction" },
+                { name: "Rope Pushdown", sets: 3, reps: "10–15", rest: 60, cue: "Triceps, flare tali di bagian bawah" }
+            ]
+        },
+        B: {
+            title: "Workout B — Pull (Rabu)",
+            location: "Gym (Rumah Saudara)",
+            exercises: [
+                { name: "Seated / Single-arm Cable Row", sets: 4, reps: "10–12", rest: 90, cue: "Lats & ketebalan punggung atas" },
+                { name: "Face Pull", sets: 3, reps: "15", rest: 60, cue: "Rear delt, rotasi luar, postur tegap" },
+                { name: "DB Lateral Raise", sets: 3, reps: "15–20", rest: 60, cue: "Lateral delt" },
+                { name: "EZ Bar Curl", sets: 3, reps: "10–12", rest: 60, cue: "Biceps, rentang gerak penuh tanpa ayunan" },
+                { name: "RDL Barbell / DB", sets: 3, reps: "10", rest: 90, cue: "Hamstring & glute, hip-hinge strict" }
+            ]
+        },
+        C: {
+            title: "Workout C — Full Body & Visual (Jumat)",
+            location: "Gym (Rumah Saudara)",
+            exercises: [
+                { name: "Smith Squat / Split Squat", sets: 3, reps: "8–12", rest: 120, cue: "Kaki secukupnya untuk proporsi" },
+                { name: "Flat DB / Smith Bench Press", sets: 3, reps: "8–12", rest: 90, cue: "Dada tengah" },
+                { name: "Cable Row", sets: 3, reps: "10–12", rest: 90, cue: "Punggung atas" },
+                { name: "Cable Lateral Raise", sets: 4, reps: "15–25", rest: 60, cue: "Lateral delt (metabolic pump)" },
+                { name: "Cable Reverse Fly", sets: 3, reps: "15", rest: 60, cue: "Rear delt" },
+                { name: "Superset: Hammer Curl + Rope Ext", sets: 2, reps: "10–15", rest: 60, cue: "Lengan superset tanpa jeda" }
+            ]
+        },
+        Rumah: {
+            title: "Sesi Rumah (Selasa & Sabtu)",
+            location: "Rumah (Pull-Up Bar)",
+            exercises: [
+                { name: "Pull-up / Chin-up", sets: 4, reps: "AMRAP−1", rest: 120, cue: "Sisakan RIR 1–2, form bersih tanpa kipping" },
+                { name: "Dead Bug (Opsional)", sets: 3, reps: "10/sisi", rest: 45, cue: "Stabilitas anterior core & pelvis" }
+            ]
+        },
+        Darurat: {
+            title: "Versi Darurat Rumah (20–25 Mnt)",
+            location: "Rumah (Waktu Sangat Terbatas)",
+            exercises: [
+                { name: "Push-up", sets: 3, reps: "12–20", rest: 60, cue: "Dada & triceps" },
+                { name: "Pull-up", sets: 3, reps: "AMRAP−1", rest: 90, cue: "Lats & bicep" },
+                { name: "Pike Push-up", sets: 2, reps: "8–12", rest: 60, cue: "Bahu & upper chest" },
+                { name: "Plank", sets: 2, reps: "45–60 dtk", rest: 45, cue: "Core brace" }
+            ]
+        }
+    };
+
+    const WEEKS_SCHEDULE = [
+        { week: 1, range: "28/9 – 4/10", tag: "tag-reentry", tagText: "Re-entry", days: [{d:"Sen", dt:"28/9", t:"A"}, {d:"Sel", dt:"29/9", t:"Rumah"}, {d:"Rab", dt:"30/9", t:"B"}, {d:"Jum", dt:"2/10", t:"C"}, {d:"Sab", dt:"3/10", t:"Rumah"}] },
+        { week: 2, range: "5/10 – 11/10", tag: "tag-build", tagText: "Build", days: [{d:"Sen", dt:"5/10", t:"A"}, {d:"Sel", dt:"6/10", t:"Rumah"}, {d:"Rab", dt:"7/10", t:"B"}, {d:"Jum", dt:"9/10", t:"C"}, {d:"Sab", dt:"10/10", t:"Rumah"}] },
+        { week: 3, range: "12/10 – 18/10", tag: "tag-sidang", tagText: "SIDANG", days: [{d:"Sen", dt:"12/10", t:"A (ringan)"}, {d:"Sel", dt:"13/10", t:"Rumah (ringan)"}, {d:"Rab", dt:"14/10", t:"LIBUR H-1"}, {d:"Jum", dt:"16/10", t:"C (ringan)"}, {d:"Sab", dt:"17/10", t:"Opsional"}] },
+        { week: 4, range: "19/10 – 25/10", tag: "tag-build", tagText: "Build Penuh", days: [{d:"Sen", dt:"19/10", t:"A"}, {d:"Sel", dt:"20/10", t:"Rumah"}, {d:"Rab", dt:"21/10", t:"B"}, {d:"Jum", dt:"23/10", t:"C"}, {d:"Sab", dt:"24/10", t:"Rumah"}] },
+        { week: 5, range: "26/10 – 1/11", tag: "tag-build", tagText: "Build", days: [{d:"Sen", dt:"26/10", t:"A"}, {d:"Sel", dt:"27/10", t:"Rumah"}, {d:"Rab", dt:"28/10", t:"B"}, {d:"Jum", dt:"30/10", t:"C"}, {d:"Sab", dt:"31/10", t:"Rumah"}] },
+        { week: 6, range: "2/11 – 8/11", tag: "tag-refine", tagText: "Refinement", days: [{d:"Sen", dt:"2/11", t:"A"}, {d:"Sel", dt:"3/11", t:"Rumah"}, {d:"Rab", dt:"4/11", t:"B"}, {d:"Jum", dt:"6/11", t:"C"}, {d:"Sab", dt:"7/11", t:"Rumah"}] },
+        { week: 7, range: "9/11 – 15/11", tag: "tag-refine", tagText: "Refinement", days: [{d:"Sen", dt:"9/11", t:"A"}, {d:"Sel", dt:"10/11", t:"Rumah"}, {d:"Rab", dt:"11/11", t:"B"}, {d:"Jum", dt:"13/11", t:"C"}, {d:"Sab", dt:"14/11", t:"Rumah"}] },
+        { week: 8, range: "16/11 – 22/11", tag: "tag-refine", tagText: "Refinement", days: [{d:"Sen", dt:"16/11", t:"A"}, {d:"Sel", dt:"17/11", t:"Rumah"}, {d:"Rab", dt:"18/11", t:"B"}, {d:"Jum", dt:"20/11", t:"C"}, {d:"Sab", dt:"21/11", t:"Rumah"}] },
+        { week: 9, range: "23/11 – 29/11", tag: "tag-taper", tagText: "Taper", days: [{d:"Sen", dt:"23/11", t:"A"}, {d:"Sel", dt:"24/11", t:"Rumah"}, {d:"Rab", dt:"25/11", t:"B (taper)"}, {d:"Jum", dt:"27/11", t:"C (taper)"}, {d:"Sab", dt:"28/11", t:"Rumah"}] },
+        { week: 10, range: "30/11 – 2/12", tag: "tag-wisuda", tagText: "WISUDA", days: [{d:"Sen", dt:"30/11", t:"A (ringan)"}, {d:"Sel", dt:"1/12", t:"Santai"}, {d:"Rab", dt:"2/12", t:"WISUDA"}, {d:"—", dt:"—", t:"—"}, {d:"—", dt:"—", t:"—"}] }
+    ];
+
+    // Local Storage Keys
+    const LS_CALENDAR = "bw_mobile_cal_v2";
+    const LS_LOGS = "bw_mobile_logs_v2";
+    const LS_CHECKIN = "bw_mobile_ci_v2";
+
+    let stateCalendar = JSON.parse(localStorage.getItem(LS_CALENDAR)) || {};
+    let stateLogs = JSON.parse(localStorage.getItem(LS_LOGS)) || [];
+    let stateCheckin = JSON.parse(localStorage.getItem(LS_CHECKIN)) || {};
+
+    // Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+        calculateCountdowns();
+        detectTodayMission();
+        loadRoutineTemplate("A");
+        renderCalendar();
+        renderRecentLogs();
+        runCalorieHelper();
+        updateProgressMetrics();
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    });
+
+    // --- Navigation ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+        const targetScreen = document.getElementById(`tab-${tabId}`);
+        const targetNav = document.getElementById(`nav-${tabId}`);
+
+        if (targetScreen) targetScreen.classList.add('active');
+        if (targetNav) targetNav.classList.add('active');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Countdowns ---
+    function calculateCountdowns() {
+        const now = new Date();
+        const sidang = new Date("2026-10-15T00:00:00");
+        const wisuda = new Date("2026-12-02T00:00:00");
+
+        const ds = Math.ceil((sidang - now) / (1000 * 60 * 60 * 24));
+        const dw = Math.ceil((wisuda - now) / (1000 * 60 * 60 * 24));
+
+        document.getElementById("countdown-sidang-text").textContent = ds > 0 ? `${ds} Hari Lagi` : (ds === 0 ? "HARI INI!" : "Tuntas");
+        document.getElementById("countdown-wisuda-text").textContent = dw > 0 ? `${dw} Hari Lagi` : (dw === 0 ? "HARI INI!" : "Tuntas");
+    }
+
+    // --- Detect Today Mission ---
+    let detectedRoutineKey = "A";
+    function detectTodayMission() {
+        const day = new Date().getDay(); // 0 Sun, 1 Mon, 2 Tue, 3 Wed, 4 Thu, 5 Fri, 6 Sat
+        const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const dayName = dayNames[day];
+
+        let routineKey = "A";
+        let title = "Workout A — Push";
+        let loc = "Gym (Rumah Saudara)";
+        let chips = ["Incline DB Press", "Shoulder Press", "Cable Lateral", "Triceps"];
+
+        if (day === 1) { // Mon
+            routineKey = "A";
+            title = "Workout A — Push (Dada, Bahu, Triceps)";
+            loc = "Gym (Rumah Saudara)";
+            chips = ["Incline DB Press", "Shoulder Press", "Cable Lateral", "Cable Fly", "Rope Pushdown"];
+        } else if (day === 2) { // Tue
+            routineKey = "Rumah";
+            title = "Sesi Rumah — Pull-Up & Core";
+            loc = "Rumah (Pull-Up Bar)";
+            chips = ["Pull-up 4x AMRAP-1", "Dead Bug Core"];
+        } else if (day === 3) { // Wed
+            routineKey = "B";
+            title = "Workout B — Pull (Punggung & Rear Delt)";
+            loc = "Gym (Rumah Saudara)";
+            chips = ["Cable Row", "Face Pull", "DB Lateral", "EZ Curl", "RDL"];
+        } else if (day === 4) { // Thu
+            routineKey = "Rest";
+            title = "Rest / Recovery Aktif";
+            loc = "Rumah / Luar (Jalan Santai)";
+            chips = ["Target 7.000–10.000 langkah", "Tidur cukup 7–9 jam", "Fokus Skripsi"];
+        } else if (day === 5) { // Fri
+            routineKey = "C";
+            title = "Workout C — Full Body & Visual";
+            loc = "Gym (Rumah Saudara)";
+            chips = ["Smith Squat", "Bench Press", "Cable Row", "Lateral Raise", "Superset Arm"];
+        } else if (day === 6) { // Sat
+            routineKey = "Rumah";
+            title = "Sesi Rumah — Pull-Up & Core";
+            loc = "Rumah (Pull-Up Bar)";
+            chips = ["Pull-up 4x AMRAP-1", "Dead Bug Core"];
+        } else { // Sun
+            routineKey = "Rest";
+            title = "Rest & Evaluasi Mingguan";
+            loc = "Rumah";
+            chips = ["Check-in Mingguan", "Ukur Pinggang & BB", "Foto Progres", "Recovery"];
+        }
+
+        detectedRoutineKey = routineKey;
+        document.getElementById("today-day-label").textContent = `HARI INI (${dayName.toUpperCase()})`;
+        document.getElementById("today-workout-title").textContent = title;
+        document.getElementById("today-loc-text").innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>${loc}</span>`;
+
+        const chipsContainer = document.getElementById("today-chips");
+        chipsContainer.innerHTML = "";
+        chips.forEach(c => {
+            const span = document.createElement("span");
+            span.className = "chip";
+            span.textContent = c;
+            chipsContainer.appendChild(span);
+        });
+    }
+
+    function launchTodaySession() {
+        if (detectedRoutineKey === "Rest") {
+            switchTab('checkin');
+            return;
+        }
+        document.getElementById("active-routine-select").value = detectedRoutineKey;
+        loadRoutineTemplate(detectedRoutineKey);
+        switchTab('logger');
+    }
+
+    // --- Interactive Routine Logger Template ---
+    let activeRoutineData = [];
+    function loadRoutineTemplate(key) {
+        const routine = ROUTINES[key] || ROUTINES.A;
+        const container = document.getElementById("routine-exercises-list");
+        container.innerHTML = "";
+        activeRoutineData = [];
+
+        routine.exercises.forEach((ex, exIdx) => {
+            const block = document.createElement("div");
+            block.className = "exercise-block";
+
+            block.innerHTML = `
+                <div class="exercise-header">
+                    <div>
+                        <div class="ex-name">${ex.name}</div>
+                        <div class="ex-cue">${ex.cue}</div>
+                    </div>
+                    <div class="ex-scheme">${ex.sets} × ${ex.reps}</div>
+                </div>
+                <div id="sets-container-${exIdx}">
+                    <!-- Set rows -->
+                </div>
+            `;
+            container.appendChild(block);
+
+            const setsContainer = block.querySelector(`#sets-container-${exIdx}`);
+            for (let s = 1; s <= ex.sets; s++) {
+                const row = document.createElement("div");
+                row.className = "set-row";
+                row.id = `row-${exIdx}-${s}`;
+
+                // Default weights estimate
+                let defWeight = 10;
+                let defReps = 10;
+
+                row.innerHTML = `
+                    <div class="set-num">#${s}</div>
+                    <div class="stepper">
+                        <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', -2.5)">-</button>
+                        <input type="number" step="0.5" class="stepper-input" id="w-${exIdx}-${s}" value="${defWeight}">
+                        <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', +2.5)">+</button>
+                    </div>
+                    <div class="stepper">
+                        <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', -1)">-</button>
+                        <input type="number" class="stepper-input" id="r-${exIdx}-${s}" value="${defReps}">
+                        <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', +1)">+</button>
+                    </div>
+                    <button class="btn-check-set" id="chk-${exIdx}-${s}" onclick="toggleSetDone(${exIdx}, ${s}, ${ex.rest})">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                `;
+                setsContainer.appendChild(row);
+            }
+        });
+    }
+
+    function stepVal(id, delta) {
+        const inp = document.getElementById(id);
+        if (inp) {
+            let val = parseFloat(inp.value) || 0;
+            val = Math.max(0, val + delta);
+            inp.value = val;
+        }
+    }
+
+    function toggleSetDone(exIdx, sIdx, restSeconds) {
+        const btn = document.getElementById(`chk-${exIdx}-${sIdx}`);
+        const isDone = btn.classList.contains("done");
+
+        if (!isDone) {
+            btn.classList.add("done");
+            // Auto trigger floating rest timer!
+            startFloatingTimer(restSeconds || 90);
+        } else {
+            btn.classList.remove("done");
+        }
+    }
+
+    function confirmResetCurrentWorkout() {
+        if (confirm("Reset input angkatan sesi ini?")) {
+            const routineKey = document.getElementById("active-routine-select").value;
+            loadRoutineTemplate(routineKey);
+        }
+    }
+
+    // --- Floating Rest Timer & Audio Feedback ---
+    let floatTimerRemaining = 90;
+    let floatTimerInterval = null;
+    let floatTimerIsRunning = false;
+
+    function startFloatingTimer(seconds) {
+        clearInterval(floatTimerInterval);
+        floatTimerRemaining = seconds;
+        floatTimerIsRunning = true;
+
+        const floatBar = document.getElementById("floating-timer");
+        floatBar.classList.remove("hidden");
+        document.getElementById("btn-timer-control").textContent = "Pause";
+
+        updateTimerDisplay();
+
+        floatTimerInterval = setInterval(() => {
+            if (floatTimerRemaining > 0) {
+                floatTimerRemaining--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(floatTimerInterval);
+                floatTimerIsRunning = false;
+                triggerHapticAndSound();
+                alert("Waktu istirahat habis! Siap untuk set berikutnya.");
+                closeFloatingTimer();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(floatTimerRemaining / 60).toString().padStart(2, '0');
+        const s = (floatTimerRemaining % 60).toString().padStart(2, '0');
+        document.getElementById("timer-display-float").textContent = `${m}:${s}`;
+    }
+
+    function adjustTimer(delta) {
+        floatTimerRemaining = Math.max(0, floatTimerRemaining + delta);
+        updateTimerDisplay();
+    }
+
+    function toggleFloatingTimer() {
+        const btn = document.getElementById("btn-timer-control");
+        if (floatTimerIsRunning) {
+            clearInterval(floatTimerInterval);
+            floatTimerIsRunning = false;
+            btn.textContent = "Start";
+        } else {
+            floatTimerIsRunning = true;
+            btn.textContent = "Pause";
+            floatTimerInterval = setInterval(() => {
+                if (floatTimerRemaining > 0) {
+                    floatTimerRemaining--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(floatTimerInterval);
+                    triggerHapticAndSound();
+                    closeFloatingTimer();
+                }
+            }, 1000);
+        }
+    }
+
+    function closeFloatingTimer() {
+        clearInterval(floatTimerInterval);
+        document.getElementById("floating-timer").classList.add("hidden");
+    }
+
+    function triggerHapticAndSound() {
+        if (navigator.vibrate) {
+            navigator.vibrate([250, 100, 250]);
+        }
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.connect(g);
+            g.connect(ctx.destination);
+            osc.frequency.value = 800;
+            g.gain.value = 0.3;
+            osc.start();
+            setTimeout(() => { osc.stop(); ctx.close(); }, 400);
+        } catch(e) {}
+    }
+
+    // --- Save Finished Workout ---
+    function finishAndSaveWorkout() {
+        const routineKey = document.getElementById("active-routine-select").value;
+        const routine = ROUTINES[routineKey] || ROUTINES.A;
+        const weight = document.getElementById("finish-weight").value || "-";
+        const sleep = document.getElementById("finish-sleep").value || "-";
+
+        // Collect completed sets
+        let logLines = [];
+        routine.exercises.forEach((ex, exIdx) => {
+            let completedSets = [];
+            for (let s = 1; s <= ex.sets; s++) {
+                const isDone = document.getElementById(`chk-${exIdx}-${s}`)?.classList.contains("done");
+                if (isDone) {
+                    const w = document.getElementById(`w-${exIdx}-${s}`).value;
+                    const r = document.getElementById(`r-${exIdx}-${s}`).value;
+                    completedSets.push(`${w}kg × ${r}r`);
+                }
+            }
+            if (completedSets.length > 0) {
+                logLines.push(`• ${ex.name}: ${completedSets.join(", ")}`);
+            }
+        });
+
+        if (logLines.length === 0) {
+            alert("Harap centang set yang telah diselesaikan terlebih dahulu.");
+            return;
+        }
+
+        const newLog = {
+            id: Date.now(),
+            routineTitle: routine.title,
+            date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+            weight,
+            sleep,
+            details: logLines.join("\n")
+        };
+
+        stateLogs.unshift(newLog);
+        localStorage.setItem(LS_LOGS, JSON.stringify(stateLogs));
+
+        renderRecentLogs();
+        alert("Sesi latihan berhasil dicatat ke riwayat!");
+        switchTab('today');
+    }
+
+    function renderRecentLogs() {
+        const container = document.getElementById("recent-logs-container");
+        container.innerHTML = "";
+
+        if (stateLogs.length === 0) {
+            container.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim); text-align: center; padding: 16px;">Belum ada sesi tersimpan.</div>`;
+            return;
+        }
+
+        stateLogs.slice(0, 5).forEach(l => {
+            const div = document.createElement("div");
+            div.className = "history-item";
+            div.innerHTML = `
+                <div class="history-top">
+                    <span>${l.routineTitle}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-dim);">${l.date}</span>
+                </div>
+                <div class="history-meta">BB: ${l.weight} kg • Tidur: ${l.sleep} jam</div>
+                <div class="history-body">${l.details}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // --- Calendar 10 Weeks ---
+    function renderCalendar() {
+        const container = document.getElementById("calendar-weeks-container");
+        container.innerHTML = "";
+
+        WEEKS_SCHEDULE.forEach(w => {
+            const card = document.createElement("div");
+            card.className = "cal-week-card";
+
+            card.innerHTML = `
+                <div class="cal-week-header">
+                    <div>
+                        <span class="cal-week-title">Pekan ${w.week}</span>
+                        <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono); margin-left: 6px;">${w.range}</span>
+                    </div>
+                    <span class="tag ${w.tag}">${w.tagText}</span>
+                </div>
+                <div class="cal-days-row" id="cal-row-${w.week}"></div>
+            `;
+            container.appendChild(card);
+
+            const rowDays = card.querySelector(`#cal-row-${w.week}`);
+            w.days.forEach((day, idx) => {
+                const box = document.createElement("div");
+                const k = `w${w.week}_d${idx}`;
+                const isChecked = !!stateCalendar[k];
+
+                box.className = `cal-day-box ${isChecked ? 'checked' : ''}`;
+                box.innerHTML = `
+                    <div class="cal-day-name">${day.d}</div>
+                    <div class="cal-day-date">${day.dt}</div>
+                    <div class="cal-day-check"><i class="fa-${isChecked ? 'solid' : 'regular'} fa-circle-check"></i></div>
+                `;
+
+                if (day.dt !== "—") {
+                    box.onclick = () => {
+                        stateCalendar[k] = !stateCalendar[k];
+                        localStorage.setItem(LS_CALENDAR, JSON.stringify(stateCalendar));
+                        renderCalendar();
+                        updateProgressMetrics();
+                    };
+                }
+                rowDays.appendChild(box);
+            });
+        });
+    }
+
+    function updateProgressMetrics() {
+        const checkedCount = Object.values(stateCalendar).filter(Boolean).length;
+        const total = 44;
+        const pct = Math.min(100, Math.round((checkedCount / total) * 100));
+
+        document.getElementById("quick-progress-pct").textContent = `${pct}%`;
+        document.getElementById("quick-progress-bar").style.width = `${pct}%`;
+        document.getElementById("quick-sessions-count").textContent = `${checkedCount} / ${total} sesi selesai`;
+    }
+
+    // --- Calorie Helper ---
+    function runCalorieHelper() {
+        const bb = document.getElementById("calc-bb").value;
+        const waist = document.getElementById("calc-waist").value;
+        const strength = document.getElementById("calc-strength").value;
+        const box = document.getElementById("calc-result-box");
+
+        if (bb === "turun" && strength === "stagnan") {
+            box.style.background = "rgba(245, 158, 11, 0.12)";
+            box.style.borderColor = "rgba(245, 158, 11, 0.4)";
+            box.style.color = "#fde68a";
+            box.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation"></i> TAMBAH +100 s.d. +200 kkal/hari.</strong><br>Defisit terlalu agresif menyebabkan penurunan kekuatan dan penyusutan visual otot.`;
+        } else if (bb === "naik" && waist === "membesar") {
+            box.style.background = "rgba(244, 63, 94, 0.12)";
+            box.style.borderColor = "rgba(244, 63, 94, 0.4)";
+            box.style.color = "#fca5a5";
+            box.innerHTML = `<strong><i class="fa-solid fa-arrow-down"></i> KURANGI -100 s.d. -200 kkal/hari.</strong><br>Surplus berlebih menimbun lingkar pinggang dan mengaburkan definisi v-taper.`;
+        } else if (strength === "naik" && (waist === "stabil" || waist === "mengecil")) {
+            box.style.background = "rgba(16, 185, 129, 0.12)";
+            box.style.borderColor = "rgba(16, 185, 129, 0.4)";
+            box.style.color = "#6ee7b7";
+            box.innerHTML = `<strong><i class="fa-solid fa-circle-check"></i> REKOMPOSISI SEMPURNA — PERTAHANKAN.</strong><br>Otot bertambah kuat dan lingkar pinggang terkendali. Lanjutkan asupan saat ini.`;
+        } else {
+            box.style.background = "rgba(79, 142, 247, 0.12)";
+            box.style.borderColor = "rgba(79, 142, 247, 0.4)";
+            box.style.color = "#93c5fd";
+            box.innerHTML = `<strong><i class="fa-solid fa-info"></i> PERTAHANKAN KALORI BASELINE (2.100–2.400 kkal).</strong><br>Pantau moving average berat badan selama 1 minggu ke depan.`;
+        }
+    }
+
+    function saveWeeklyCheckin() {
+        const week = document.getElementById("ci-week-select").value;
+        const bb = document.getElementById("ci-bb").value;
+        const waist = document.getElementById("ci-waist").value;
+        const sleep = document.getElementById("ci-sleep").value;
+        const d = document.getElementById("ci-photo-d").checked;
+        const s = document.getElementById("ci-photo-s").checked;
+        const b = document.getElementById("ci-photo-b").checked;
+
+        stateCheckin[`w${week}`] = { bb, waist, sleep, d, s, b, date: new Date().toLocaleDateString('id-ID') };
+        localStorage.setItem(LS_CHECKIN, JSON.stringify(stateCheckin));
+        alert(`Data check-in Pekan ${week} berhasil disimpan!`);
+    }
+
+    // --- JSON Backup & Restore ---
+    function exportJSONData() {
+        const payload = {
+            calendar: stateCalendar,
+            logs: stateLogs,
+            checkins: stateCheckin,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `physique_tracker_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+    }
+
+    function importJSONData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.calendar) stateCalendar = data.calendar;
+                if (data.logs) stateLogs = data.logs;
+                if (data.checkins) stateCheckin = data.checkins;
+
+                localStorage.setItem(LS_CALENDAR, JSON.stringify(stateCalendar));
+                localStorage.setItem(LS_LOGS, JSON.stringify(stateLogs));
+                localStorage.setItem(LS_CHECKIN, JSON.stringify(stateCheckin));
+
+                renderCalendar();
+                renderRecentLogs();
+                updateProgressMetrics();
+                alert("Data berhasil dipulihkan!");
+            } catch (err) {
+                alert("Format file JSON tidak valid.");
+            }
+        };
+        reader.readAsText(file);
+    }
+</script>
+
+</body>
+</html>
