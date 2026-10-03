@@ -1,5 +1,5 @@
-// Service Worker for 100% Offline PWA Execution - v2
-const CACHE_NAME = 'physique-tracker-v2';
+// Service Worker for 100% Offline PWA Execution - v3
+const CACHE_NAME = 'physique-tracker-v3';
 const ASSETS = [
   './',
   './index.html',

@@ -517,6 +517,81 @@
             color: #042f2e;
         }
 
+        /* Variation Selector & Bodyweight Badges */
+        .variation-selector-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-label {
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .var-pills {
+            display: inline-flex;
+            gap: 4px;
+            background: var(--bg-card-subtle);
+            padding: 2px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .var-pill {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-family: var(--font-sans);
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .var-pill.active {
+            background: var(--accent-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .bw-badge {
+            background: rgba(45, 212, 191, 0.08);
+            border: 1px solid rgba(45, 212, 191, 0.25);
+            color: var(--accent-teal);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            user-select: none;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .draft-banner {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: #6ee7b7;
+        }
+
         /* Calendar Matrix on Mobile */
         .cal-week-card {
             background: var(--bg-surface);
@@ -699,7 +774,7 @@
             </div>
             <div>
                 <h1 class="app-title">Physique & Posture</h1>
-                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.1</span></div>
+                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.2</span></div>
             </div>
         </div>
         <button onclick="switchTab('panduan')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; padding: 6px;">
@@ -779,9 +854,15 @@
                 <button onclick="confirmResetCurrentWorkout()" style="background: none; border: none; color: var(--text-dim); font-size: 0.78rem;">Reset Input</button>
             </div>
 
+            <!-- Auto-save Draft Alert Banner -->
+            <div id="draft-alert-banner" class="draft-banner" style="display: none;">
+                <div><i class="fa-solid fa-floppy-disk"></i> <strong>Draft Aktif Dipulihkan:</strong> Catatan otomatis tersimpan jika HP hang/reload.</div>
+                <button onclick="confirmResetCurrentWorkout()" style="background: none; border: 1px solid rgba(16,185,129,0.5); color: #6ee7b7; border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; cursor: pointer; white-space: nowrap;">Reset Sesi</button>
+            </div>
+
             <div style="margin-bottom: 14px;">
                 <label class="form-lbl">Pilih Program Latihan</label>
-                <select class="form-inp" id="active-routine-select" onchange="loadRoutineTemplate(this.value)">
+                <select class="form-inp" id="active-routine-select" onchange="onRoutineSelectChange(this.value)">
                     <option value="A">Workout A — Push (Dada, Bahu, Triceps)</option>
                     <option value="B">Workout B — Pull (Punggung Atas, Rear Delt, Lats)</option>
                     <option value="C">Workout C — Full Body & Visual (Squat, Bench, Lateral)</option>
@@ -799,11 +880,11 @@
             <div class="form-row" style="margin-top: 14px;">
                 <div>
                     <label class="form-lbl">BB Pagi (kg)</label>
-                    <input type="number" step="0.1" class="form-inp" id="finish-weight" placeholder="e.g. 63.2">
+                    <input type="number" step="0.1" class="form-inp" id="finish-weight" placeholder="e.g. 63.2" oninput="autoSaveSessionDraft()">
                 </div>
                 <div>
                     <label class="form-lbl">Tidur Semalam (jam)</label>
-                    <input type="number" step="0.5" class="form-inp" id="finish-sleep" placeholder="e.g. 7.5">
+                    <input type="number" step="0.5" class="form-inp" id="finish-sleep" placeholder="e.g. 7.5" oninput="autoSaveSessionDraft()">
                 </div>
             </div>
 
@@ -1023,52 +1104,89 @@
             title: "Workout A — Push (Senin)",
             location: "Gym (Rumah Saudara)",
             exercises: [
-                { name: "Incline DB Press", sets: 3, reps: "8–12", rest: 90, cue: "Upper chest, sudut bangku 30–45°" },
-                { name: "Smith / DB Shoulder Press", sets: 3, reps: "8–12", rest: 90, cue: "Bahu, kontrol deselerasi negatif" },
-                { name: "Cable Lateral Raise", sets: 4, reps: "12–20", rest: 60, cue: "Prioritas visual bahu lebar (v-taper)" },
-                { name: "Cable Fly Low-to-High", sets: 3, reps: "12–15", rest: 60, cue: "Upper chest contraction" },
-                { name: "Rope Pushdown", sets: 3, reps: "10–15", rest: 60, cue: "Triceps, flare tali di bagian bawah" }
+                { name: "Incline DB Press", sets: 3, reps: "8–12", rest: 90, cue: "Upper chest, sudut bangku 30–45°", defaultWeight: 16, defaultReps: 10 },
+                { 
+                    name: "Smith / DB Shoulder Press", 
+                    variations: ["Smith Shoulder Press", "DB Shoulder Press"], 
+                    defaultVar: "Smith Shoulder Press",
+                    sets: 3, reps: "8–12", rest: 90, cue: "Bahu, kontrol deselerasi negatif", defaultWeight: 20, defaultReps: 10 
+                },
+                { name: "Cable Lateral Raise", sets: 4, reps: "12–20", rest: 60, cue: "Prioritas visual bahu lebar (v-taper)", defaultWeight: 5, defaultReps: 15 },
+                { name: "Cable Fly Low-to-High", sets: 3, reps: "12–15", rest: 60, cue: "Upper chest contraction", defaultWeight: 7.5, defaultReps: 12 },
+                { name: "Rope Pushdown", sets: 3, reps: "10–15", rest: 60, cue: "Triceps, flare tali di bagian bawah", defaultWeight: 15, defaultReps: 12 }
             ]
         },
         B: {
             title: "Workout B — Pull (Rabu)",
             location: "Gym (Rumah Saudara)",
             exercises: [
-                { name: "Seated / Single-arm Cable Row", sets: 4, reps: "10–12", rest: 90, cue: "Lats & ketebalan punggung atas" },
-                { name: "Face Pull", sets: 3, reps: "15", rest: 60, cue: "Rear delt, rotasi luar, postur tegap" },
-                { name: "DB Lateral Raise", sets: 3, reps: "15–20", rest: 60, cue: "Lateral delt" },
-                { name: "EZ Bar Curl", sets: 3, reps: "10–12", rest: 60, cue: "Biceps, rentang gerak penuh tanpa ayunan" },
-                { name: "RDL Barbell / DB", sets: 3, reps: "10", rest: 90, cue: "Hamstring & glute, hip-hinge strict" }
+                { 
+                    name: "Seated / Single-arm Cable Row", 
+                    variations: ["Seated Cable Row", "Single-arm Cable Row"], 
+                    defaultVar: "Seated Cable Row",
+                    sets: 4, reps: "10–12", rest: 90, cue: "Lats & ketebalan punggung atas", defaultWeight: 25, defaultReps: 10 
+                },
+                { name: "Face Pull", sets: 3, reps: "15", rest: 60, cue: "Rear delt, rotasi luar, postur tegap", defaultWeight: 12.5, defaultReps: 15 },
+                { name: "DB Lateral Raise", sets: 3, reps: "15–20", rest: 60, cue: "Lateral delt", defaultWeight: 6, defaultReps: 15 },
+                { name: "EZ Bar Curl", sets: 3, reps: "10–12", rest: 60, cue: "Biceps, rentang gerak penuh tanpa ayunan", defaultWeight: 15, defaultReps: 10 },
+                { 
+                    name: "RDL Barbell / DB", 
+                    variations: ["RDL Barbell", "RDL Dumbbell"], 
+                    defaultVar: "RDL Barbell",
+                    sets: 3, reps: "10", rest: 90, cue: "Hamstring & glute, hip-hinge strict", defaultWeight: 30, defaultReps: 10 
+                }
             ]
         },
         C: {
             title: "Workout C — Full Body & Visual (Jumat)",
             location: "Gym (Rumah Saudara)",
             exercises: [
-                { name: "Smith Squat / Split Squat", sets: 3, reps: "8–12", rest: 120, cue: "Kaki secukupnya untuk proporsi" },
-                { name: "Flat DB / Smith Bench Press", sets: 3, reps: "8–12", rest: 90, cue: "Dada tengah" },
-                { name: "Cable Row", sets: 3, reps: "10–12", rest: 90, cue: "Punggung atas" },
-                { name: "Cable Lateral Raise", sets: 4, reps: "15–25", rest: 60, cue: "Lateral delt (metabolic pump)" },
-                { name: "Cable Reverse Fly", sets: 3, reps: "15", rest: 60, cue: "Rear delt" },
-                { name: "Superset: Hammer Curl + Rope Ext", sets: 2, reps: "10–15", rest: 60, cue: "Lengan superset tanpa jeda" }
+                { 
+                    name: "Smith Squat / Split Squat", 
+                    variations: ["Smith Squat", "Split Squat"], 
+                    defaultVar: "Smith Squat",
+                    sets: 3, reps: "8–12", rest: 120, cue: "Kaki secukupnya untuk proporsi", defaultWeight: 30, defaultReps: 10 
+                },
+                { 
+                    name: "Flat DB / Smith Bench Press", 
+                    variations: ["Flat DB Bench Press", "Smith Bench Press"], 
+                    defaultVar: "Flat DB Bench Press",
+                    sets: 3, reps: "8–12", rest: 90, cue: "Dada tengah", defaultWeight: 18, defaultReps: 10 
+                },
+                { name: "Cable Row", sets: 3, reps: "10–12", rest: 90, cue: "Punggung atas", defaultWeight: 25, defaultReps: 10 },
+                { name: "Cable Lateral Raise", sets: 4, reps: "15–25", rest: 60, cue: "Lateral delt (metabolic pump)", defaultWeight: 5, defaultReps: 15 },
+                { name: "Cable Reverse Fly", sets: 3, reps: "15", rest: 60, cue: "Rear delt", defaultWeight: 7.5, defaultReps: 15 },
+                { name: "Superset: Hammer Curl + Rope Ext", sets: 2, reps: "10–15", rest: 60, cue: "Lengan superset tanpa jeda", defaultWeight: 10, defaultReps: 12 }
             ]
         },
         Rumah: {
             title: "Sesi Rumah (Selasa & Sabtu)",
             location: "Rumah (Pull-Up Bar)",
             exercises: [
-                { name: "Pull-up / Chin-up", sets: 4, reps: "AMRAP−1", rest: 120, cue: "Sisakan RIR 1–2, form bersih tanpa kipping" },
-                { name: "Dead Bug (Opsional)", sets: 3, reps: "10/sisi", rest: 45, cue: "Stabilitas anterior core & pelvis" }
+                { 
+                    name: "Pull-up / Chin-up", 
+                    variations: ["Pull-up", "Chin-up"], 
+                    defaultVar: "Pull-up",
+                    sets: 4, reps: "AMRAP−1", rest: 120, 
+                    isBodyweight: true, defaultReps: 6,
+                    cue: "Sisakan RIR 1–2, form bersih tanpa kipping" 
+                },
+                { 
+                    name: "Dead Bug (Opsional)", 
+                    sets: 3, reps: "10/sisi", rest: 45, 
+                    isBodyweight: true, repUnit: "/sisi", defaultReps: 10,
+                    cue: "Stabilitas anterior core & pelvis" 
+                }
             ]
         },
         Darurat: {
             title: "Versi Darurat Rumah (20–25 Mnt)",
             location: "Rumah (Waktu Sangat Terbatas)",
             exercises: [
-                { name: "Push-up", sets: 3, reps: "12–20", rest: 60, cue: "Dada & triceps" },
-                { name: "Pull-up", sets: 3, reps: "AMRAP−1", rest: 90, cue: "Lats & bicep" },
-                { name: "Pike Push-up", sets: 2, reps: "8–12", rest: 60, cue: "Bahu & upper chest" },
-                { name: "Plank", sets: 2, reps: "45–60 dtk", rest: 45, cue: "Core brace" }
+                { name: "Push-up", sets: 3, reps: "12–20", rest: 60, isBodyweight: true, defaultReps: 15, cue: "Dada & triceps" },
+                { name: "Pull-up", sets: 3, reps: "AMRAP−1", rest: 90, isBodyweight: true, defaultReps: 6, cue: "Lats & bicep" },
+                { name: "Pike Push-up", sets: 2, reps: "8–12", rest: 60, isBodyweight: true, defaultReps: 10, cue: "Bahu & upper chest" },
+                { name: "Plank", sets: 2, reps: "45–60 dtk", rest: 45, isBodyweight: true, repUnit: "dtk", defaultReps: 45, cue: "Core brace" }
             ]
         }
     };
@@ -1090,16 +1208,20 @@
     const LS_CALENDAR = "bw_mobile_cal_v2";
     const LS_LOGS = "bw_mobile_logs_v2";
     const LS_CHECKIN = "bw_mobile_ci_v2";
+    const LS_ACTIVE_DRAFT = "bw_active_workout_draft_v2";
 
     let stateCalendar = JSON.parse(localStorage.getItem(LS_CALENDAR)) || {};
     let stateLogs = JSON.parse(localStorage.getItem(LS_LOGS)) || [];
     let stateCheckin = JSON.parse(localStorage.getItem(LS_CHECKIN)) || {};
+    let currentSelectedVariations = {};
 
     // Initialization
     document.addEventListener("DOMContentLoaded", () => {
         calculateCountdowns();
         detectTodayMission();
-        loadRoutineTemplate("A");
+        if (!restoreActiveSessionDraft()) {
+            loadRoutineTemplate("A");
+        }
         renderCalendar();
         renderRecentLogs();
         runCalorieHelper();
@@ -1107,7 +1229,7 @@
 
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=2').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=3').then(reg => {
                 reg.update();
             }).catch(() => {});
         }
@@ -1216,33 +1338,168 @@
 
     // --- Interactive Routine Logger Template ---
     let activeRoutineData = [];
-    function loadRoutineTemplate(key) {
+
+    function updateDraftBanner(show) {
+        const banner = document.getElementById("draft-alert-banner");
+        if (banner) banner.style.display = show ? "flex" : "none";
+    }
+
+    function selectVariation(exIdx, varName) {
+        currentSelectedVariations[exIdx] = varName;
+        const titleEl = document.getElementById(`ex-title-${exIdx}`);
+        if (titleEl) titleEl.textContent = varName;
+
+        document.querySelectorAll(`.var-pill-${exIdx}`).forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.val === varName);
+        });
+        autoSaveSessionDraft();
+    }
+
+    function autoSaveSessionDraft() {
+        const routineSelect = document.getElementById("active-routine-select");
+        if (!routineSelect) return;
+        const routineKey = routineSelect.value;
+        const routine = ROUTINES[routineKey] || ROUTINES.A;
+        const finishWeight = document.getElementById("finish-weight")?.value || "";
+        const finishSleep = document.getElementById("finish-sleep")?.value || "";
+
+        const draftData = {
+            routineKey,
+            finishWeight,
+            finishSleep,
+            variations: currentSelectedVariations,
+            sets: {},
+            timestamp: Date.now()
+        };
+
+        routine.exercises.forEach((ex, exIdx) => {
+            for (let s = 1; s <= ex.sets; s++) {
+                const wEl = document.getElementById(`w-${exIdx}-${s}`);
+                const rEl = document.getElementById(`r-${exIdx}-${s}`);
+                const chkEl = document.getElementById(`chk-${exIdx}-${s}`);
+                draftData.sets[`${exIdx}-${s}`] = {
+                    weight: wEl ? parseFloat(wEl.value) : null,
+                    reps: rEl ? parseInt(rEl.value, 10) : (ex.defaultReps || 10),
+                    done: chkEl ? chkEl.classList.contains("done") : false
+                };
+            }
+        });
+
+        localStorage.setItem(LS_ACTIVE_DRAFT, JSON.stringify(draftData));
+        updateDraftBanner(true);
+    }
+
+    function restoreActiveSessionDraft() {
+        const raw = localStorage.getItem(LS_ACTIVE_DRAFT);
+        if (!raw) {
+            updateDraftBanner(false);
+            return false;
+        }
+        try {
+            const draft = JSON.parse(raw);
+            if (!draft || !draft.routineKey || !ROUTINES[draft.routineKey]) return false;
+
+            const routineSelect = document.getElementById("active-routine-select");
+            if (routineSelect) routineSelect.value = draft.routineKey;
+            if (draft.finishWeight) {
+                const fw = document.getElementById("finish-weight");
+                if (fw) fw.value = draft.finishWeight;
+            }
+            if (draft.finishSleep) {
+                const fs = document.getElementById("finish-sleep");
+                if (fs) fs.value = draft.finishSleep;
+            }
+            currentSelectedVariations = draft.variations || {};
+
+            loadRoutineTemplate(draft.routineKey, draft);
+            updateDraftBanner(true);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function onRoutineSelectChange(newKey) {
+        const raw = localStorage.getItem(LS_ACTIVE_DRAFT);
+        if (raw) {
+            try {
+                const d = JSON.parse(raw);
+                const hasDone = Object.values(d.sets || {}).some(s => s.done);
+                if (hasDone && d.routineKey !== newKey) {
+                    if (!confirm("Anda memiliki catatan sesi yang sedang berjalan. Ganti sesi dan reset catatan saat ini?")) {
+                        document.getElementById("active-routine-select").value = d.routineKey;
+                        return;
+                    }
+                }
+            } catch(e) {}
+        }
+        localStorage.removeItem(LS_ACTIVE_DRAFT);
+        currentSelectedVariations = {};
+        updateDraftBanner(false);
+        loadRoutineTemplate(newKey);
+    }
+
+    function loadRoutineTemplate(key, savedDraft = null) {
         const routine = ROUTINES[key] || ROUTINES.A;
         const container = document.getElementById("routine-exercises-list");
         container.innerHTML = "";
         activeRoutineData = [];
 
+        if (!savedDraft) {
+            const raw = localStorage.getItem(LS_ACTIVE_DRAFT);
+            if (raw) {
+                try {
+                    const d = JSON.parse(raw);
+                    if (d && d.routineKey === key) savedDraft = d;
+                } catch (e) {}
+            }
+        }
+
+        if (savedDraft && savedDraft.variations) {
+            currentSelectedVariations = Object.assign({}, savedDraft.variations);
+        }
+
         routine.exercises.forEach((ex, exIdx) => {
             const block = document.createElement("div");
             block.className = "exercise-block";
 
+            const currentVar = currentSelectedVariations[exIdx] || ex.defaultVar || ex.name;
+            currentSelectedVariations[exIdx] = currentVar;
+
+            let variationHtml = "";
+            if (ex.variations && ex.variations.length > 0) {
+                variationHtml = `
+                    <div class="variation-selector-group">
+                        <span class="var-label"><i class="fa-solid fa-sliders"></i> Variasi:</span>
+                        <div class="var-pills">
+                            ${ex.variations.map(v => `
+                                <button type="button" class="var-pill var-pill-${exIdx} ${v === currentVar ? 'active' : ''}" data-val="${v}" onclick="selectVariation(${exIdx}, '${v}')">${v}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const isBw = !!ex.isBodyweight;
+            const headerCol2 = isBw ? '<div style="color: var(--accent-teal);"><i class="fa-solid fa-person" style="font-size: 0.65rem;"></i> TIPE</div>' : '<div style="color: var(--accent-blue);"><i class="fa-solid fa-weight-hanging" style="font-size: 0.65rem;"></i> BEBAN</div>';
+            const repUnit = ex.repUnit || 'rep';
+
             block.innerHTML = `
                 <div class="exercise-header">
                     <div>
-                        <div class="ex-name">${ex.name}</div>
+                        <div class="ex-name" id="ex-title-${exIdx}">${currentVar}</div>
                         <div class="ex-cue">${ex.cue}</div>
+                        ${variationHtml}
                     </div>
                     <div class="ex-scheme">${ex.sets} × ${ex.reps}</div>
                 </div>
                 <div style="display: grid; grid-template-columns: 32px 1fr 1fr 44px; gap: 8px; font-family: var(--font-mono); font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; text-align: center; font-weight: 600;">
                     <div>SET</div>
-                    <div style="color: var(--accent-blue);"><i class="fa-solid fa-weight-hanging" style="font-size: 0.65rem;"></i> BEBAN</div>
+                    ${headerCol2}
                     <div style="color: var(--accent-teal);"><i class="fa-solid fa-repeat" style="font-size: 0.65rem;"></i> REPS</div>
                     <div>DONE</div>
                 </div>
-                <div id="sets-container-${exIdx}">
-                    <!-- Set rows -->
-                </div>
+                <div id="sets-container-${exIdx}"></div>
             `;
             container.appendChild(block);
 
@@ -1252,31 +1509,45 @@
                 row.className = "set-row";
                 row.id = `row-${exIdx}-${s}`;
 
-                // Default weights estimate
-                let defWeight = 10;
-                let defReps = 10;
+                const draftSet = savedDraft && savedDraft.sets && savedDraft.sets[`${exIdx}-${s}`];
+                const isDone = draftSet ? !!draftSet.done : false;
+
+                let colWeightHtml = "";
+                if (isBw) {
+                    const bwBadgeText = repUnit === 'dtk' ? 'Isometric' : (repUnit === '/sisi' ? 'Core / BW' : 'Bodyweight');
+                    colWeightHtml = `<div class="bw-badge"><i class="fa-solid fa-person"></i> ${bwBadgeText}</div>`;
+                } else {
+                    const defWeight = draftSet && draftSet.weight !== undefined && draftSet.weight !== null ? draftSet.weight : (ex.defaultWeight !== undefined ? ex.defaultWeight : 10);
+                    colWeightHtml = `
+                        <div class="stepper">
+                            <button type="button" class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', -2.5)">-</button>
+                            <input type="number" step="0.5" class="stepper-input" id="w-${exIdx}-${s}" value="${defWeight}" onchange="autoSaveSessionDraft()">
+                            <span class="stepper-unit">kg</span>
+                            <button type="button" class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', +2.5)">+</button>
+                        </div>
+                    `;
+                }
+
+                const defReps = draftSet && draftSet.reps !== undefined && draftSet.reps !== null ? draftSet.reps : (ex.defaultReps !== undefined ? ex.defaultReps : 10);
 
                 row.innerHTML = `
                     <div class="set-num">#${s}</div>
+                    ${colWeightHtml}
                     <div class="stepper">
-                        <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', -2.5)">-</button>
-                        <input type="number" step="0.5" class="stepper-input" id="w-${exIdx}-${s}" value="${defWeight}">
-                        <span class="stepper-unit">kg</span>
-                        <button class="stepper-btn" onclick="stepVal('w-${exIdx}-${s}', +2.5)">+</button>
+                        <button type="button" class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', -1)">-</button>
+                        <input type="number" class="stepper-input" id="r-${exIdx}-${s}" value="${defReps}" onchange="autoSaveSessionDraft()">
+                        <span class="stepper-unit">${repUnit}</span>
+                        <button type="button" class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', +1)">+</button>
                     </div>
-                    <div class="stepper">
-                        <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', -1)">-</button>
-                        <input type="number" class="stepper-input" id="r-${exIdx}-${s}" value="${defReps}">
-                        <span class="stepper-unit">rep</span>
-                        <button class="stepper-btn" onclick="stepVal('r-${exIdx}-${s}', +1)">+</button>
-                    </div>
-                    <button class="btn-check-set" id="chk-${exIdx}-${s}" onclick="toggleSetDone(${exIdx}, ${s}, ${ex.rest})">
+                    <button type="button" class="btn-check-set ${isDone ? 'done' : ''}" id="chk-${exIdx}-${s}" onclick="toggleSetDone(${exIdx}, ${s}, ${ex.rest})">
                         <i class="fa-solid fa-check"></i>
                     </button>
                 `;
                 setsContainer.appendChild(row);
             }
         });
+
+        updateDraftBanner(!!savedDraft && Object.keys(savedDraft.sets || {}).length > 0);
     }
 
     function stepVal(id, delta) {
@@ -1285,24 +1556,33 @@
             let val = parseFloat(inp.value) || 0;
             val = Math.max(0, val + delta);
             inp.value = val;
+            autoSaveSessionDraft();
         }
     }
 
     function toggleSetDone(exIdx, sIdx, restSeconds) {
         const btn = document.getElementById(`chk-${exIdx}-${sIdx}`);
+        if (!btn) return;
         const isDone = btn.classList.contains("done");
 
         if (!isDone) {
             btn.classList.add("done");
-            // Auto trigger floating rest timer!
             startFloatingTimer(restSeconds || 90);
         } else {
             btn.classList.remove("done");
         }
+        autoSaveSessionDraft();
     }
 
     function confirmResetCurrentWorkout() {
-        if (confirm("Reset input angkatan sesi ini?")) {
+        if (confirm("Reset seluruh input sesi ini dan mulai dari awal?")) {
+            localStorage.removeItem(LS_ACTIVE_DRAFT);
+            currentSelectedVariations = {};
+            updateDraftBanner(false);
+            const wInput = document.getElementById("finish-weight");
+            const sInput = document.getElementById("finish-sleep");
+            if (wInput) wInput.value = "";
+            if (sInput) sInput.value = "";
             const routineKey = document.getElementById("active-routine-select").value;
             loadRoutineTemplate(routineKey);
         }
@@ -1403,17 +1683,26 @@
         // Collect completed sets
         let logLines = [];
         routine.exercises.forEach((ex, exIdx) => {
+            const exName = currentSelectedVariations[exIdx] || ex.defaultVar || ex.name;
             let completedSets = [];
             for (let s = 1; s <= ex.sets; s++) {
                 const isDone = document.getElementById(`chk-${exIdx}-${s}`)?.classList.contains("done");
                 if (isDone) {
-                    const w = document.getElementById(`w-${exIdx}-${s}`).value;
-                    const r = document.getElementById(`r-${exIdx}-${s}`).value;
-                    completedSets.push(`${w}kg × ${r}r`);
+                    const r = document.getElementById(`r-${exIdx}-${s}`)?.value || 0;
+                    if (ex.isBodyweight) {
+                        completedSets.push(`${r}${ex.repUnit || 'r'}`);
+                    } else {
+                        const w = document.getElementById(`w-${exIdx}-${s}`)?.value || 0;
+                        completedSets.push(`${w}kg × ${r}r`);
+                    }
                 }
             }
             if (completedSets.length > 0) {
-                logLines.push(`• ${ex.name}: ${completedSets.join(", ")}`);
+                if (ex.isBodyweight) {
+                    logLines.push(`• ${exName}: BW (${completedSets.join(", ")})`);
+                } else {
+                    logLines.push(`• ${exName}: ${completedSets.join(", ")}`);
+                }
             }
         });
 
@@ -1434,6 +1723,16 @@
         stateLogs.unshift(newLog);
         localStorage.setItem(LS_LOGS, JSON.stringify(stateLogs));
 
+        localStorage.removeItem(LS_ACTIVE_DRAFT);
+        currentSelectedVariations = {};
+        updateDraftBanner(false);
+
+        const wInput = document.getElementById("finish-weight");
+        const sInput = document.getElementById("finish-sleep");
+        if (wInput) wInput.value = "";
+        if (sInput) sInput.value = "";
+
+        loadRoutineTemplate(routineKey);
         renderRecentLogs();
         alert("Sesi latihan berhasil dicatat ke riwayat!");
         switchTab('today');
