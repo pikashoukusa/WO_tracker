@@ -774,7 +774,7 @@
             </div>
             <div>
                 <h1 class="app-title">Physique & Posture</h1>
-                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.2</span></div>
+                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.3</span></div>
             </div>
         </div>
         <button onclick="switchTab('panduan')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; padding: 6px;">
@@ -1220,7 +1220,10 @@
         calculateCountdowns();
         detectTodayMission();
         if (!restoreActiveSessionDraft()) {
-            loadRoutineTemplate("A");
+            const initialRoutine = (detectedRoutineKey && detectedRoutineKey !== "Rest") ? detectedRoutineKey : "A";
+            const sel = document.getElementById("active-routine-select");
+            if (sel) sel.value = initialRoutine;
+            loadRoutineTemplate(initialRoutine);
         }
         renderCalendar();
         renderRecentLogs();
@@ -1229,7 +1232,7 @@
 
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=3').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=4').then(reg => {
                 reg.update();
             }).catch(() => {});
         }
@@ -1344,8 +1347,10 @@
         if (banner) banner.style.display = show ? "flex" : "none";
     }
 
-    function selectVariation(exIdx, varName) {
-        currentSelectedVariations[exIdx] = varName;
+    function selectVariation(exIdx, varName, exName) {
+        if (exName) {
+            currentSelectedVariations[exName] = varName;
+        }
         const titleEl = document.getElementById(`ex-title-${exIdx}`);
         if (titleEl) titleEl.textContent = varName;
 
@@ -1409,7 +1414,16 @@
                 const fs = document.getElementById("finish-sleep");
                 if (fs) fs.value = draft.finishSleep;
             }
-            currentSelectedVariations = draft.variations || {};
+            
+            currentSelectedVariations = {};
+            if (draft.variations && typeof draft.variations === 'object') {
+                for (const [k, v] of Object.entries(draft.variations)) {
+                    // Filter out legacy numeric index keys
+                    if (isNaN(Number(k)) && typeof v === 'string') {
+                        currentSelectedVariations[k] = v;
+                    }
+                }
+            }
 
             loadRoutineTemplate(draft.routineKey, draft);
             updateDraftBanner(true);
@@ -1455,25 +1469,32 @@
             }
         }
 
-        if (savedDraft && savedDraft.variations) {
-            currentSelectedVariations = Object.assign({}, savedDraft.variations);
+        if (savedDraft && savedDraft.variations && typeof savedDraft.variations === 'object') {
+            for (const [k, v] of Object.entries(savedDraft.variations)) {
+                if (isNaN(Number(k)) && typeof v === 'string') {
+                    currentSelectedVariations[k] = v;
+                }
+            }
         }
 
         routine.exercises.forEach((ex, exIdx) => {
             const block = document.createElement("div");
             block.className = "exercise-block";
 
-            const currentVar = currentSelectedVariations[exIdx] || ex.defaultVar || ex.name;
-            currentSelectedVariations[exIdx] = currentVar;
-
+            let currentVar = ex.name;
             let variationHtml = "";
+
             if (ex.variations && ex.variations.length > 0) {
+                currentVar = currentSelectedVariations[ex.name] || ex.defaultVar || ex.variations[0];
+                currentSelectedVariations[ex.name] = currentVar;
+
+                const escapedExName = ex.name.replace(/'/g, "\\'");
                 variationHtml = `
                     <div class="variation-selector-group">
                         <span class="var-label"><i class="fa-solid fa-sliders"></i> Variasi:</span>
                         <div class="var-pills">
                             ${ex.variations.map(v => `
-                                <button type="button" class="var-pill var-pill-${exIdx} ${v === currentVar ? 'active' : ''}" data-val="${v}" onclick="selectVariation(${exIdx}, '${v}')">${v}</button>
+                                <button type="button" class="var-pill var-pill-${exIdx} ${v === currentVar ? 'active' : ''}" data-val="${v}" onclick="selectVariation(${exIdx}, '${v.replace(/'/g, "\\'")}', '${escapedExName}')">${v}</button>
                             `).join('')}
                         </div>
                     </div>
@@ -1683,7 +1704,9 @@
         // Collect completed sets
         let logLines = [];
         routine.exercises.forEach((ex, exIdx) => {
-            const exName = currentSelectedVariations[exIdx] || ex.defaultVar || ex.name;
+            const exName = (ex.variations && ex.variations.length > 0)
+                ? (currentSelectedVariations[ex.name] || ex.defaultVar || ex.name)
+                : ex.name;
             let completedSets = [];
             for (let s = 1; s <= ex.sets; s++) {
                 const isDone = document.getElementById(`chk-${exIdx}-${s}`)?.classList.contains("done");
