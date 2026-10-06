@@ -1,5 +1,5 @@
-// Service Worker for 100% Offline PWA Execution - v4
-const CACHE_NAME = 'physique-tracker-v4';
+// Service Worker for 100% Offline PWA Execution - v5
+const CACHE_NAME = 'physique-tracker-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -61,6 +61,18 @@ self.addEventListener('fetch', (e) => {
         .catch(() => {});
 
       return cachedRes || fetchPromise;
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('./index.html');
     })
   );
 });

@@ -774,7 +774,7 @@
             </div>
             <div>
                 <h1 class="app-title">Physique & Posture</h1>
-                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.3</span></div>
+                <div class="app-sub">Target Wisuda 2 Des 2026 • <span style="color: var(--accent-teal); font-weight: 600;">v2.4</span></div>
             </div>
         </div>
         <button onclick="switchTab('panduan')" style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; padding: 6px;">
@@ -1229,10 +1229,11 @@
         renderRecentLogs();
         runCalorieHelper();
         updateProgressMetrics();
+        restoreFloatingTimerState();
 
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=4').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=5').then(reg => {
                 reg.update();
             }).catch(() => {});
         }
@@ -1609,88 +1610,296 @@
         }
     }
 
-    // --- Floating Rest Timer & Audio Feedback ---
-    let floatTimerRemaining = 90;
+    // --- Floating Rest Timer & Background Sync (Timestamp-Based) ---
+    const LS_REST_TIMER = "bw_active_rest_timer_v1";
+    let timerEndTime = null;           // Timestamp (ms) target waktu habis
+    let timerPausedRemaining = null;   // Sisa detik jika dalam kondisi jeda (paused)
     let floatTimerInterval = null;
     let floatTimerIsRunning = false;
+    let wakeLockSentinel = null;
+    let audioContextWarm = null;
+
+    function warmUpAudioContext() {
+        try {
+            if (!audioContextWarm) {
+                audioContextWarm = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContextWarm.state === 'suspended') {
+                audioContextWarm.resume();
+            }
+        } catch(e) {}
+    }
+
+    async function acquireWakeLock() {
+        if ('wakeLock' in navigator && !wakeLockSentinel) {
+            try {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockSentinel.addEventListener('release', () => {
+                    wakeLockSentinel = null;
+                });
+            } catch(e) {}
+        }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLockSentinel) {
+            try {
+                wakeLockSentinel.release();
+            } catch(e) {}
+            wakeLockSentinel = null;
+        }
+    }
+
+    function requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
+        }
+    }
+
+    function notifyTimerDone() {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("Waktu Istirahat Selesai!", {
+                            body: "Waktu istirahat habis. Siap untuk set berikutnya!",
+                            icon: "icon-192.png",
+                            vibrate: [250, 100, 250],
+                            tag: "workout-rest-timer"
+                        });
+                    }).catch(() => {
+                        new Notification("Waktu Istirahat Selesai!", {
+                            body: "Waktu istirahat habis. Siap untuk set berikutnya!",
+                            icon: "icon-192.png"
+                        });
+                    });
+                } else {
+                    new Notification("Waktu Istirahat Selesai!", {
+                        body: "Waktu istirahat habis. Siap untuk set berikutnya!",
+                        icon: "icon-192.png"
+                    });
+                }
+            } catch(e) {}
+        }
+    }
 
     function startFloatingTimer(seconds) {
         clearInterval(floatTimerInterval);
-        floatTimerRemaining = seconds;
+        warmUpAudioContext();
+        requestNotificationPermission();
+
+        const sec = Math.max(1, parseInt(seconds, 10) || 90);
+        timerEndTime = Date.now() + (sec * 1000);
+        timerPausedRemaining = null;
         floatTimerIsRunning = true;
 
+        saveTimerState();
+
         const floatBar = document.getElementById("floating-timer");
-        floatBar.classList.remove("hidden");
-        document.getElementById("btn-timer-control").textContent = "Pause";
+        if (floatBar) floatBar.classList.remove("hidden");
+        const btnCtrl = document.getElementById("btn-timer-control");
+        if (btnCtrl) btnCtrl.textContent = "Pause";
 
-        updateTimerDisplay();
+        acquireWakeLock();
+        updateTimerDisplay(sec);
 
-        floatTimerInterval = setInterval(() => {
-            if (floatTimerRemaining > 0) {
-                floatTimerRemaining--;
-                updateTimerDisplay();
-            } else {
-                clearInterval(floatTimerInterval);
-                floatTimerIsRunning = false;
-                triggerHapticAndSound();
-                alert("Waktu istirahat habis! Siap untuk set berikutnya.");
-                closeFloatingTimer();
-            }
-        }, 1000);
+        floatTimerInterval = setInterval(tickFloatingTimer, 500);
     }
 
-    function updateTimerDisplay() {
-        const m = Math.floor(floatTimerRemaining / 60).toString().padStart(2, '0');
-        const s = (floatTimerRemaining % 60).toString().padStart(2, '0');
-        document.getElementById("timer-display-float").textContent = `${m}:${s}`;
+    function tickFloatingTimer() {
+        if (!floatTimerIsRunning || !timerEndTime) return;
+
+        const remainingMs = timerEndTime - Date.now();
+        const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+
+        updateTimerDisplay(remainingSec);
+
+        if (remainingSec <= 0) {
+            finishFloatingTimer();
+        }
+    }
+
+    function finishFloatingTimer() {
+        clearInterval(floatTimerInterval);
+        floatTimerIsRunning = false;
+        timerEndTime = null;
+        timerPausedRemaining = null;
+        clearTimerState();
+        releaseWakeLock();
+
+        triggerHapticAndSound();
+        notifyTimerDone();
+        closeFloatingTimer();
+
+        setTimeout(() => {
+            if (document.visibilityState === "visible") {
+                alert("Waktu istirahat habis! Siap untuk set berikutnya.");
+            }
+        }, 100);
+    }
+
+    function updateTimerDisplay(remainingSec) {
+        const sec = Math.max(0, remainingSec);
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        const disp = document.getElementById("timer-display-float");
+        if (disp) disp.textContent = `${m}:${s}`;
     }
 
     function adjustTimer(delta) {
-        floatTimerRemaining = Math.max(0, floatTimerRemaining + delta);
-        updateTimerDisplay();
+        if (floatTimerIsRunning && timerEndTime) {
+            timerEndTime += (delta * 1000);
+            const remainingSec = Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000));
+            updateTimerDisplay(remainingSec);
+            saveTimerState();
+            if (remainingSec <= 0) {
+                finishFloatingTimer();
+            }
+        } else if (!floatTimerIsRunning && timerPausedRemaining !== null) {
+            timerPausedRemaining = Math.max(0, timerPausedRemaining + delta);
+            updateTimerDisplay(timerPausedRemaining);
+            saveTimerState();
+        }
     }
 
     function toggleFloatingTimer() {
         const btn = document.getElementById("btn-timer-control");
         if (floatTimerIsRunning) {
+            // Pause
             clearInterval(floatTimerInterval);
             floatTimerIsRunning = false;
-            btn.textContent = "Start";
+            const remainingMs = (timerEndTime ? timerEndTime - Date.now() : 0);
+            timerPausedRemaining = Math.max(0, Math.ceil(remainingMs / 1000));
+            timerEndTime = null;
+            if (btn) btn.textContent = "Start";
+            releaseWakeLock();
+            saveTimerState();
+            updateTimerDisplay(timerPausedRemaining);
         } else {
+            // Resume
+            const sec = (timerPausedRemaining !== null && timerPausedRemaining > 0) ? timerPausedRemaining : 90;
+            timerEndTime = Date.now() + (sec * 1000);
+            timerPausedRemaining = null;
             floatTimerIsRunning = true;
-            btn.textContent = "Pause";
-            floatTimerInterval = setInterval(() => {
-                if (floatTimerRemaining > 0) {
-                    floatTimerRemaining--;
-                    updateTimerDisplay();
-                } else {
-                    clearInterval(floatTimerInterval);
-                    triggerHapticAndSound();
-                    closeFloatingTimer();
-                }
-            }, 1000);
+            if (btn) btn.textContent = "Pause";
+            acquireWakeLock();
+            saveTimerState();
+            updateTimerDisplay(sec);
+            floatTimerInterval = setInterval(tickFloatingTimer, 500);
         }
     }
 
     function closeFloatingTimer() {
         clearInterval(floatTimerInterval);
-        document.getElementById("floating-timer").classList.add("hidden");
+        floatTimerIsRunning = false;
+        timerEndTime = null;
+        timerPausedRemaining = null;
+        clearTimerState();
+        releaseWakeLock();
+        const floatBar = document.getElementById("floating-timer");
+        if (floatBar) floatBar.classList.add("hidden");
     }
+
+    function saveTimerState() {
+        try {
+            if (floatTimerIsRunning && timerEndTime) {
+                localStorage.setItem(LS_REST_TIMER, JSON.stringify({
+                    running: true,
+                    endTime: timerEndTime
+                }));
+            } else if (!floatTimerIsRunning && timerPausedRemaining !== null) {
+                localStorage.setItem(LS_REST_TIMER, JSON.stringify({
+                    running: false,
+                    pausedRemaining: timerPausedRemaining
+                }));
+            }
+        } catch(e) {}
+    }
+
+    function clearTimerState() {
+        try {
+            localStorage.removeItem(LS_REST_TIMER);
+        } catch(e) {}
+    }
+
+    function restoreFloatingTimerState() {
+        try {
+            const raw = localStorage.getItem(LS_REST_TIMER);
+            if (!raw) return;
+            const state = JSON.parse(raw);
+            if (!state) return;
+
+            if (state.running && state.endTime) {
+                const remainingSec = Math.ceil((state.endTime - Date.now()) / 1000);
+                if (remainingSec > 0) {
+                    clearInterval(floatTimerInterval);
+                    timerEndTime = state.endTime;
+                    timerPausedRemaining = null;
+                    floatTimerIsRunning = true;
+
+                    const floatBar = document.getElementById("floating-timer");
+                    if (floatBar) floatBar.classList.remove("hidden");
+                    const btnCtrl = document.getElementById("btn-timer-control");
+                    if (btnCtrl) btnCtrl.textContent = "Pause";
+
+                    acquireWakeLock();
+                    updateTimerDisplay(remainingSec);
+                    floatTimerInterval = setInterval(tickFloatingTimer, 500);
+                } else {
+                    clearTimerState();
+                }
+            } else if (!state.running && typeof state.pausedRemaining === 'number' && state.pausedRemaining > 0) {
+                timerPausedRemaining = state.pausedRemaining;
+                timerEndTime = null;
+                floatTimerIsRunning = false;
+
+                const floatBar = document.getElementById("floating-timer");
+                if (floatBar) floatBar.classList.remove("hidden");
+                const btnCtrl = document.getElementById("btn-timer-control");
+                if (btnCtrl) btnCtrl.textContent = "Start";
+
+                updateTimerDisplay(state.pausedRemaining);
+            }
+        } catch(e) {}
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            if (floatTimerIsRunning && timerEndTime) {
+                acquireWakeLock();
+                tickFloatingTimer();
+            }
+        }
+    });
+
+    window.addEventListener("pageshow", () => {
+        if (floatTimerIsRunning && timerEndTime) {
+            tickFloatingTimer();
+        } else {
+            restoreFloatingTimerState();
+        }
+    });
 
     function triggerHapticAndSound() {
         if (navigator.vibrate) {
-            navigator.vibrate([250, 100, 250]);
+            try { navigator.vibrate([300, 150, 300]); } catch(e) {}
         }
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = audioContextWarm || new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
             const osc = ctx.createOscillator();
             const g = ctx.createGain();
             osc.connect(g);
             g.connect(ctx.destination);
-            osc.frequency.value = 800;
-            g.gain.value = 0.3;
-            osc.start();
-            setTimeout(() => { osc.stop(); ctx.close(); }, 400);
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.gain.setValueAtTime(0.3, ctx.currentTime);
+            osc.start(ctx.currentTime);
+            setTimeout(() => {
+                try { osc.stop(); } catch(e) {}
+            }, 400);
         } catch(e) {}
     }
 
